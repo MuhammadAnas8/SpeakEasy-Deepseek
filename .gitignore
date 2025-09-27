@@ -1,0 +1,16 @@
+# Node (if monorepo)
+node_modules/
+dist/
+build/
+
+# Python/Rasa
+rasa_backend/venv/
+rasa_backend/.rasa/
+**/__pycache__/
+**/*.pyc
+*.log
+
+# Secrets
+.env
+.env.*
+# rasa_backend/credentials.yml
