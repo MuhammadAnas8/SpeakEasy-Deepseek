@@ -1,9 +1,8 @@
 import React, { useState } from "react";
-import { TextareaComposer, useMessageInputContext } from "stream-chat-react";
 import { Mic, Send } from "lucide-react";
 
-const CustomInput = () => {
-  const { handleSubmit } = useMessageInputContext();
+const CustomInput = ({ onSend }) => {
+  const [message, setMessage] = useState("");
   const [isRecording, setIsRecording] = useState(false);
 
   const handleMicClick = () => {
@@ -13,6 +12,12 @@ const CustomInput = () => {
       console.log("⏹️ Recording stopped...");
     }
     setIsRecording(!isRecording);
+  };
+
+  const handleSend = () => {
+    if (!message.trim()) return;
+    onSend?.(message); // call parent callback
+    setMessage(""); // clear after sending
   };
 
   return (
@@ -29,17 +34,19 @@ const CustomInput = () => {
       </button>
 
       {/* Input box */}
-      <div className="flex-1 mx-2">
-        <TextareaComposer
-          placeholder="Type a message..."
-          className="w-full px-3 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-        />
-      </div>
+      <textarea
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        placeholder="Type a message..."
+        rows={1}
+        className="flex-1 mx-2 px-3 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+        onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSend())}
+      />
 
-      {/* Send button (custom, no warning) */}
+      {/* Send button */}
       <button
         type="button"
-        onClick={handleSubmit}
+        onClick={handleSend}
         className="p-2 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition"
       >
         <Send size={20} />

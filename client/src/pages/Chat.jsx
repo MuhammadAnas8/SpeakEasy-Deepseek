@@ -1,28 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useLayoutEffect } from "react";
 import axios from "axios";
-import {
-  Chat,
-  Channel,
-  Window,
-  ChannelHeader,
-  MessageList,
-  MessageInput,
-} from "stream-chat-react";
-import { StreamChat } from "stream-chat";
-import { useSearchParams } from "react-router-dom";
-import "stream-chat-react/dist/css/v2/index.css";
-
 import CustomInput from "../components/chat/CustomInput";
-import CustomMessage from "../components/chat/CustomMessage";
 import TopicSidebar from "../components/chat/TopicSidebar";
+import CustomMessage from "../components/chat/CustomMessage";
 
-const apiKey = "csxy28pygm9g";
-const userId = "Ali"; 
-
-async function fetchToken(userId) {
-  const { data } = await axios.get(`http://localhost:8000/token?userId=${userId}`);
-  return data.token;
-}
 
 const topics = [
   { id: "dr", name: "Talk to Dr" },
@@ -31,57 +12,90 @@ const topics = [
 ];
 
 export default function ChatPage() {
-  const [client, setClient] = useState(null);
-  const [channel, setChannel] = useState(null);
-  const [searchParams] = useSearchParams();
+  const [messages, setMessages] = useState([]);
+  const [selectedTopic, setSelectedTopic] = useState(topics[0]);
 
-  const topicFromUrl = searchParams.get("topic");
-  const [selectedTopic, setSelectedTopic] = useState(
-    topicFromUrl ? topics.find(t => t.id === topicFromUrl) : topics[2]
-  );
+  // refs for scrolling
+  const messagesContainerRef = useRef(null);
+  const messagesEndRef = useRef(null);
 
+  // reset chat when topic changes
   useEffect(() => {
-    let chatClient;
-    async function init() {
-      const token = await fetchToken(userId);
-      chatClient = StreamChat.getInstance(apiKey);
-
-      await chatClient.connectUser({ id: userId, name: "Anas" }, token);
-      setClient(chatClient);
-
-      const ch = chatClient.channel("messaging", selectedTopic.id, {
-        name: selectedTopic.name,
-      });
-      await ch.watch();
-      setChannel(ch);
-    }
-    init();
-
-    return () => {
-      // if (chatClient) chatClient.disconnectUser();
-    };
+    setMessages([]);
   }, [selectedTopic]);
 
-  if (!client || !channel) return <div>Loading...</div>;
+  // useLayoutEffect runs before paint — avoids flashing and race conditions
+  useLayoutEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    // if user has scrolled up (reading older messages), don't force-scroll them down
+    const NEAR_BOTTOM_THRESHOLD = 150; // px
+    const isNearBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight <
+      NEAR_BOTTOM_THRESHOLD;
+
+    if (isNearBottom) {
+      // use requestAnimationFrame to ensure layout is stable, then jump
+      requestAnimationFrame(() => {
+        container.scrollTop = container.scrollHeight;
+        // fallback: also scroll the end ref into view (safe)
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      });
+    }
+  }, [messages]); // run whenever messages change
+
+  const sendMessage = async (text) => {
+    if (!text || !text.trim()) return;
+    const userMessage = { sender: "user", text };
+    setMessages((prev) => [...prev, userMessage]);
+
+    try {
+      const { data } = await axios.post("http://localhost:8000/chat", {
+        message: text,
+        topic: selectedTopic.id,
+      });
+
+      const botMessage = { sender: "bot", text: data.reply };
+      setMessages((prev) => [...prev, botMessage]);
+    } catch (error) {
+      console.error("❌ Chat error:", error);
+      const errorMessage = {
+        sender: "bot",
+        text: "Sorry, something went wrong.",
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    }
+  };
 
   return (
-    <Chat client={client}>
-      <div style={{ display: "flex" }}>
-        <TopicSidebar
-          topics={topics}
-          selectedTopic={selectedTopic}
-          onSelect={setSelectedTopic}
-        />
-        <main style={{ flex: 1 }}>
-          <Channel channel={channel} Input={CustomInput} Message={CustomMessage}>
-            <Window>
-              <ChannelHeader />
-              <MessageList />
-              <MessageInput />
-            </Window>
-          </Channel>
-        </main>
+    <div className="flex h-screen">
+      <TopicSidebar
+        topics={topics}
+        selectedTopic={selectedTopic}
+        onSelect={setSelectedTopic}
+      />
+
+      <div className="flex flex-col flex-1 bg-gray-50">
+        {/* Messages container: IMPORTANT - this element must have overflow-y and a constrained height */}
+        <div
+          ref={messagesContainerRef}
+          className="flex-1 overflow-y-auto p-4"
+          style={{ WebkitOverflowScrolling: "touch" }} // smoother on mobile
+        >
+          <div className="flex flex-col gap-3">
+            {messages.map((msg, i) => (
+              <CustomMessage key={i} sender={msg.sender} text={msg.text} />
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+        </div>
+
+        {/* Input */}
+        <div className="p-3 border-t bg-white">
+          <CustomInput onSend={sendMessage} />
+        </div>
       </div>
-    </Chat>
+    </div>
   );
 }
