@@ -4,6 +4,7 @@ import TopicSidebar from "../components/chat/TopicSidebar";
 import CustomMessage from "../components/chat/CustomMessage";
 import useChat from "../hooks/useChat";
 import useAutoScroll from "../hooks/useAutoScroll";
+import { useSearchParams } from "react-router-dom";
 
 const topics = [
   { id: "dr", name: "Talk to Dr" },
@@ -12,7 +13,9 @@ const topics = [
 ];
 
 export default function ChatPage() {
-  const [selectedTopic, setSelectedTopic] = useState(topics[0]);
+  const topicParam = useSearchParams()[0].get("topic");
+  const topic = topics.find((t) => t.id === topicParam) || topics[0];
+  const [selectedTopic, setSelectedTopic] = useState(topic || topics[0]);
   const { messages, sendMessage } = useChat(selectedTopic);
   const { containerRef, endRef } = useAutoScroll([messages]);
 
