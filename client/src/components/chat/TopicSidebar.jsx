@@ -16,6 +16,7 @@ const TopicSidebar = ({ topics, selectedTopic, onSelect }) => {
             borderBottom: "1px solid #ccc",
             cursor: "pointer",
           }}
+          className="topic-button hover:bg-gray-100 md:block hidden"
         >
           {topic.name}
         </button>

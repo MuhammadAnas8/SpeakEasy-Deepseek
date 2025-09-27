@@ -80,7 +80,7 @@ const CustomInput = ({ onSend }) => {
         disabled={!message.trim()}
 
         onClick={handleSend}
-        className="p-2 rounded-full bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50 disabled:hover transition"
+        className="p-2 rounded-full bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50 disabled:hover:none transition"
       >
         <Send size={20} />
       </button>
