@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Speaker } from "lucide-react";
 
 export default function useChat(selectedTopic) {
   const [messages, setMessages] = useState([]);
