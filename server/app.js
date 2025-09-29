@@ -10,6 +10,7 @@ dotenv.config();
 const app = express();
 
 const allowedOrigins = [
+  "https://speakeasy-fyp.netlify.app",
   "http://localhost:5174",
   "https://j7spfpsd-5174.inc1.devtunnels.ms"
 ];
