@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import CustomInput from "../components/chat/CustomInput";
-import TopicSideBar from "../components/chat/SideBar.jsx";
+import SideBar from "../components/chat/SideBar.jsx";
 import CustomMessage from "../components/chat/CustomMessage";
 import useChat from "../hooks/useChat";
 import useAutoScroll from "../hooks/useAutoScroll";
