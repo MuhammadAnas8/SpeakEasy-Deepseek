@@ -1,6 +1,6 @@
 import React from "react";
 
-const TopicSideBar = ({ topics, selectedTopic, onSelect }) => {
+const SideBar = ({ topics, selectedTopic, onSelect }) => {
   return (
     <aside style={{ width: 200, borderRight: "1px solid #ddd" }}>
       {topics.map((topic) => (
@@ -25,4 +25,4 @@ const TopicSideBar = ({ topics, selectedTopic, onSelect }) => {
   );
 };
 
-export default TopicSideBar;
+export default SideBar;
