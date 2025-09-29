@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import CustomInput from "../components/chat/CustomInput";
-import TopicSidebar from "../components/chat/TopicSideBar";
+import TopicSideBar from "../components/chat/TopicSideBar";
 import CustomMessage from "../components/chat/CustomMessage";
 import useChat from "../hooks/useChat";
 import useAutoScroll from "../hooks/useAutoScroll";
@@ -25,7 +25,7 @@ export default function ChatPage() {
   return (
 <div className="md:flex h-screen">
   {/* Sidebar for desktop only */}
-  <TopicSidebar
+  <TopicSideBar
     topics={topics}
     selectedTopic={selectedTopic}
     onSelect={(t) => {
