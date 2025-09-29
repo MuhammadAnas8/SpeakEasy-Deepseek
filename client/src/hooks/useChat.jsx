@@ -19,11 +19,11 @@ const speak = (text) => {
 
     const userMessage = { sender: "user", text };
     setMessages((prev) => [...prev, userMessage]);
-    // const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+    const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 
     try {
-      const { data } = await axios.post("http://localhost:8000/chat", {
+      const { data } = await axios.post(`${API_BASE_URL}/chat`, {
         message: text,
         topic: selectedTopic.id,
         
